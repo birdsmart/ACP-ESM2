@@ -106,18 +106,18 @@ class CNN_BiLSTM_Attention(nn.Module):
 
         return nn.Sigmoid()(logit)
 
-# 加载模型
+# load model
 model = CNN_BiLSTM_Attention().to(device)
 model.load_state_dict(torch.load('num_model4_acc0.9427083333333334.pkl'))
 model.eval()
-tokenizer = AutoTokenizer.from_pretrained("/home/hd/SGao/new/esm2")
-# 加载数据
-test_data_path = pd.read_csv("../dataset/test1/Test_1_quence_no50.fasta")  # 修改为测试数据的路径
+tokenizer = AutoTokenizer.from_pretrained("data_path_esm2")
+# load data
+test_data_path = pd.read_csv("testdata_path") 
 test_Y, test_X = tokenize(test_data_path)
 test_dataset = AQYDataset(test_X, test_Y, device)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
-# 测试模型
+# test model
 pred_list = []
 label_list = []
 for samples, labels in test_loader:
@@ -128,34 +128,31 @@ for samples, labels in test_loader:
     pred_list.extend(preds.squeeze().cpu().detach().numpy())
     label_list.extend(labels.squeeze().cpu().detach().numpy())
 
-# 计算指标
+# caculate
 def Model_Evaluate(confus_matrix):
     TN, FP, FN, TP = confus_matrix.ravel()
     SN = TP / (TP + FN)
     SP = TN / (TN + FP)
     ACC = (TP + TN) / (TP + TN + FN + FP)
     MCC = ((TP * TN) - (FP * FN)) / (np.sqrt((TP + FN) * (TP + FP) * (TN + FP) * (TN + FN)))
-    Pre = TP / (TP + FP)
-    return SN, SP, ACC, MCC, Pre
+    return SN, SP, ACC, MCC
 
-# 计算评估指标
+
 def cal_score(pred, label):
     AUC = roc_auc_score(list(label), pred)
     pred = np.around(pred)
     label = np.array(label)
     cm = confusion_matrix(label, pred, labels=None, sample_weight=None)
-    SN, SP, ACC, MCC, Pre = Model_Evaluate(cm)
-    print("Model score --- SN:{0:.3f}  SP:{1:.3f}  ACC:{2:.3f}  MCC:{3:.3f}  Pre:{4:.3f}  AUC:{5:.3f}".format(SN, SP, ACC, MCC, Pre, AUC))
-    return SN, SP, ACC, MCC, Pre, AUC, cm
+    SN, SP, ACC, MCC = Model_Evaluate(cm)
+    print("Model score --- SN:{0:.3f}  SP:{1:.3f}  ACC:{2:.3f}  MCC:{3:.3f}  }".format(SN, SP, ACC, MCC))
+    return SN, SP, ACC, MCC, cm
 
-# 计算评估指标
-SN, SP, ACC, MCC, Pre, AUC, cm = cal_score(pred_list, label_list)
+SN, SP, ACC, MCC, cm = cal_score(pred_list, label_list)
 print("Confusion Matrix:")
 print(cm)
 print("Sensitivity:", SN)
 print("Specificity:", SP)
 print("Accuracy:", ACC)
 print("MCC:", MCC)
-print("Precision:", Pre)
-print("AUC:", AUC)
+
 
