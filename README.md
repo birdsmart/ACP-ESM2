@@ -4,3 +4,7 @@ Our code is modified based on ESM2. For more information about https://huggingfa
 ### 1.1 Create and activate a new virtual environment
 conda create -n ESM2 python=3.6 <br>
 conda activate ESM2
+### 1.2 Install the package and other requirements
+python3 -m pip install -r requirements.txt
+## 2 Download pre-trained DNABERT
+https://huggingface.co/facebook/esm2_t33_650M_UR50D
