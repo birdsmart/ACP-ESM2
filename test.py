@@ -62,9 +62,9 @@ class SelfAttention(nn.Module):
         attention = self.softmax(scores)
         output = torch.matmul(attention, value)
         return output
-class CNN_BiLSTM_Attention(nn.Module):
+class ESM_CNN_Attention(nn.Module):
     def __init__(self, embedding_dim=50, hidden_dim=32, n_layers=1):
-        super(CNN_BiLSTM_Attention, self).__init__()
+        super(ESM_CNN_Attention, self).__init__()
         self.bert = AutoModel.from_pretrained("/home/hd/SGao/new/esm2")
         # for param in self.bert.parameters():
         #     param.requires_grad = False
@@ -107,7 +107,7 @@ class CNN_BiLSTM_Attention(nn.Module):
         return nn.Sigmoid()(logit)
 
 # load model
-model = CNN_BiLSTM_Attention().to(device)
+model = ESM_CNN_Attention().to(device)
 model.load_state_dict(torch.load('num_model4_acc0.9427083333333334.pkl'))
 model.eval()
 tokenizer = AutoTokenizer.from_pretrained("data_path_esm2")
